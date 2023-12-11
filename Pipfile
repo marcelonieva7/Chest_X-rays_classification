@@ -11,6 +11,8 @@ matplotlib = "*"
 ipykernel = "*"
 tensorflow = "*"
 imageio = "*"
+flask = "*"
+gunicorn = "*"
 
 [dev-packages]
 

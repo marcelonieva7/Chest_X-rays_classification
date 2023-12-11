@@ -179,3 +179,52 @@ def multivariate_grid(df, x, y, lim={'x': None, 'y': None}):
   g.ax_marg_x.grid(False)
   g.ax_marg_y.grid(False)
   plt.show()
+
+def plot_average_intensity_histograms(image_paths_list, target_shape=(256, 256)):
+    """
+    Plot average intensity histograms for a list of images.
+
+    Parameters:
+    - image_paths_list (List[List[str]]): A list of lists containing paths to images.
+    - target_shape (Tuple[int, int]): The target shape to resize the images to. Default is (256, 256).
+
+    Returns:
+    - None
+
+    This function takes a list of lists of image paths and plots the average intensity histograms
+    for each group of images. It first resizes each image to the target shape, converts them to
+    grayscale, and then calculates the average pixel intensity of each image. The average intensity
+    histograms are then plotted using matplotlib.
+
+    Note:
+    - The target_shape parameter is optional. If not provided, the default target shape is (256, 256).
+    """
+    intensity_arrays_list = []
+    classes = []
+
+    for image_paths in image_paths_list:
+        intensity_arrays = []
+
+        for path in image_paths:
+            image_pil = Image.open(path)
+            original_shape = image_pil.size[::-1]
+            resized_image = image_pil.resize(target_shape, Image.BILINEAR)
+            resized_image = resized_image.convert('L')
+            image_array = np.array(resized_image)
+
+            intensity_arrays.append(image_array.ravel())
+
+        intensity_arrays_list.append(np.mean(intensity_arrays, axis=0))
+        classes.append(os.path.basename(os.path.dirname(image_paths[0])))
+
+    plt.figure(figsize=(15, 5))
+
+    for i, intensity_array in enumerate(intensity_arrays_list):
+        plt.subplot(1, 3, i+1)
+        plt.hist(intensity_array, bins=256, color='gray', alpha=0.7)
+        plt.xlabel('Pixel Intensity')
+        plt.ylabel('Frequency')
+        plt.title(f'Average Pixel Intensity \n \n {classes[i]}')
+
+    plt.tight_layout()
+    plt.show()

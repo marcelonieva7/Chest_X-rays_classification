@@ -10,6 +10,7 @@ numpy = "*"
 matplotlib = "*"
 ipykernel = "*"
 tensorflow = "*"
+imageio = "*"
 
 [dev-packages]
 

@@ -31,24 +31,32 @@ def get_img_paths(img_dir):
 
 def extract_image_props(impath):
   """
-  Extracts various properties of an image given its path.
-
-  Parameters:
-    impath (str): The path of the image file.
-
+  Extracts image properties from the given image path.
+  
+  Args:
+      impath (str): The path of the image file.
+  
   Returns:
-    tuple: A tuple containing the following elements:
-      - datasplit (str): The name of the data split the image belongs to.
-      - impath (str): The path of the image file.
-      - label (str): The label of the image.
-      - xsize (int): The width of the image in pixels.
-      - ysize (int): The height of the image in pixels.
-      - br_med (float): The median brightness value of the image.
-      - br_std (float): The standard deviation of brightness values in the image.
+      tuple: A tuple containing the following image properties:
+          - datasplit (str): The split of the image data.
+          - impath (str): The path of the image file.
+          - label (str): The label of the image.
+          - xsize (int): The width of the image.
+          - ysize (int): The height of the image.
+          - br_med (float): The median brightness of the image.
+          - br_std (float): The standard deviation of the brightness of the image.
+          - intens (ndarray): The intensity values of the image.
   """
   label = impath.split('/')[-2]
   label = label.lower().replace(' ', '_')
+
+  image_pil = Image.open(impath)
+  resized_image = image_pil.resize((256,256), Image.BILINEAR)
+  resized_image = resized_image.convert('L')
+  image_array = np.array(resized_image)
+
   
+  intens = image_array.ravel()
   im = imageio.imread(impath)
   br_med = np.median(im)
   br_std = np.std(im)
@@ -56,24 +64,26 @@ def extract_image_props(impath):
   ysize = im.shape[0]
   datasplit = impath.split('/')[-3]
   
-  return datasplit, impath, label, xsize, ysize, br_med, br_std
+  return datasplit, impath, label, xsize, ysize, br_med, br_std, intens
 
 def extract_image_props_all(DIR):
   """
   Extracts image properties for all images in a given directory.
-  
-  Parameters:
-  - DIR: A string representing the directory path containing the images.
-  
+
+  Args:
+      DIR (str): The directory path where the images are located.
+
   Returns:
-  - df: A pandas DataFrame containing the extracted image properties. The DataFrame has the following columns:
-        - datasplit: A string representing the data split of the image.
-        - path: A string representing the path of the image.
-        - label: A string representing the label of the image.
-        - xsize: An integer representing the width of the image.
-        - ysize: An integer representing the height of the image.
-        - br_med: A float representing the median brightness of the image.
-        - br_std: A float representing the standard deviation of the brightness of the image.
+      pandas.DataFrame: A DataFrame containing the extracted image properties. The columns of the DataFrame include:
+        - datasplit: The data split of the image.
+        - path: The path of the image.
+        - label: The label of the image.
+        - xsize: The size of the image along the x-axis.
+        - ysize: The size of the image along the y-axis.
+        - br_med: The median brightness of the image.
+        - br_std: The standard deviation of brightness of the image.
+        - intens: The intensity of the image.
+        - aspectratio_yx: The aspect ratio of the image, calculated as ysize / xsize.
   """
   impaths = get_img_paths(DIR)
   
@@ -81,8 +91,8 @@ def extract_image_props_all(DIR):
                               'br_med', 'br_std'])
 
   for i in impaths:
-    datasplit, impath, label, xsize, ysize, br_med, br_std = extract_image_props(i)
-    new_row = {'datasplit':datasplit, 'path':impath, 'label':label, 'xsize':xsize, 'ysize':ysize, 'br_med':br_med, 'br_std':br_std}
+    datasplit, impath, label, xsize, ysize, br_med, br_std, intens = extract_image_props(i)
+    new_row = {'datasplit':datasplit, 'path':impath, 'label':label, 'xsize':xsize, 'ysize':ysize, 'br_med':br_med, 'br_std':br_std, 'intens':intens}
     df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
   
   df['aspectratio_yx'] = df.ysize / df.xsize
@@ -180,51 +190,36 @@ def multivariate_grid(df, x, y, lim={'x': None, 'y': None}):
   g.ax_marg_y.grid(False)
   plt.show()
 
-def plot_average_intensity_histograms(image_paths_list, target_shape=(256, 256)):
+def plot_average_intensity_histograms(df, labels):
     """
-    Plot average intensity histograms for a list of images.
+    Generate a histogram of the average pixel intensity for each label in the given 
+    DataFrame.
 
     Parameters:
-    - image_paths_list (List[List[str]]): A list of lists containing paths to images.
-    - target_shape (Tuple[int, int]): The target shape to resize the images to. Default is (256, 256).
+    - df (DataFrame): The DataFrame containing the data.
+    - labels (list): A list of labels to plot the histograms for.
 
     Returns:
     - None
-
-    This function takes a list of lists of image paths and plots the average intensity histograms
-    for each group of images. It first resizes each image to the target shape, converts them to
-    grayscale, and then calculates the average pixel intensity of each image. The average intensity
-    histograms are then plotted using matplotlib.
-
-    Note:
-    - The target_shape parameter is optional. If not provided, the default target shape is (256, 256).
     """
-    intensity_arrays_list = []
-    classes = []
+    colors = [COLORS[3], COLORS[5], COLORS[1]]
+    intensity_list = []
 
-    for image_paths in image_paths_list:
-        intensity_arrays = []
-
-        for path in image_paths:
-            image_pil = Image.open(path)
-            original_shape = image_pil.size[::-1]
-            resized_image = image_pil.resize(target_shape, Image.BILINEAR)
-            resized_image = resized_image.convert('L')
-            image_array = np.array(resized_image)
-
-            intensity_arrays.append(image_array.ravel())
-
-        intensity_arrays_list.append(np.mean(intensity_arrays, axis=0))
-        classes.append(os.path.basename(os.path.dirname(image_paths[0])))
+    for l in labels:
+      intens = df[df['label'] == l].intens
+      intens_val = intens.values.tolist()
+      intens_mean = np.mean(intens_val, axis=0)
+      intensity_list.append(intens_mean)
 
     plt.figure(figsize=(15, 5))
 
-    for i, intensity_array in enumerate(intensity_arrays_list):
+    for i, intensity_array in enumerate(intensity_list):
         plt.subplot(1, 3, i+1)
-        plt.hist(intensity_array, bins=256, color='gray', alpha=0.7)
+        plt.hist(intensity_array, bins=256, color=colors[i], )
+      
         plt.xlabel('Pixel Intensity')
         plt.ylabel('Frequency')
-        plt.title(f'Average Pixel Intensity \n \n {classes[i]}')
+        plt.title(f'Average Pixel Intensity \n \n {labels[i]}')
 
     plt.tight_layout()
     plt.show()

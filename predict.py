@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import request, jsonify, send_file
+from flask import request, jsonify
 
 from server.controllers import get_prediction
 

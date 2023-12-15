@@ -6,7 +6,7 @@ from tensorflow.keras.optimizers import Adam
 def make_model(input_size=150,
               inner=False,
               inner_size=100,
-              droprate=0.5,
+              droprate=0,
               learning_rate=0.01
 ):
   base_model = Xception(

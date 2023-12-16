@@ -24,7 +24,7 @@ def prepare_input(x):
 
 def get_prediction(url, interpreter, i_idx, o_idx):
   img = download_image(url)
-  img = prepare_image(img, target_size=(300, 300))
+  img = prepare_image(img, target_size=(299, 299))
 
   x = np.array(img, dtype='float32')
   X = np.array([x])

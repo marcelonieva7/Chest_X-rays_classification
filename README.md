@@ -81,6 +81,10 @@ pipenv run python predict.py
 ```
 Once the server is up and running, you can send a POST request to http://localhost:9696/predict with the input data to get predictions from the model.
 
+ #### Documentation
+
+ You can see the API documentation on the endpoint [`/apidocs`](http://localhost:9696/apidocs)
+
 #### Example Usage
 
 ```bash
@@ -185,4 +189,8 @@ This cURL request sends a POST request to the server running at https://xrays-ap
 }
 ```
 
-#### [Test urls](#Test-urls)
+ [Test urls](#Test-urls)
+
+ #### Documentation
+
+ You can see the API documentation on the endpoint [`/apidocs`](https://xrays-app-srblipudfq-uc.a.run.app/apidocs)

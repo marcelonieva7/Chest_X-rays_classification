@@ -16,6 +16,8 @@ gunicorn = "*"
 tflite-runtime = "*"
 sp = "*"
 spicy = "*"
+setuptools = "*"
+flasgger = "==0.9.7b2"
 
 [dev-packages]
 

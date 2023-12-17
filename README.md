@@ -12,7 +12,7 @@ The main objective is to leverage deep learning techniques for the precise class
 - [Installation](#installation)
 - [Usage](#usage)
 - [Containerization](#containerization)
-- [Cloud deployment](#deployment)
+- [Cloud deployment](#Cloud-Deployment)
 
 ## Data
 
@@ -89,7 +89,7 @@ curl -X POST -H "Content-Type: application/json" -d '{
 }' http://localhost:9696/predict
 ```
 This cURL request sends a POST request to the server running at http://localhost:9696/predict with a JSON body containing x-ray image url. The server returns a response of:
-```bash
+```JSON
 {
   "Covid": 4.374717712402344,
   "Normal": 2.042759656906128,
@@ -97,13 +97,13 @@ This cURL request sends a POST request to the server running at http://localhost
 }
 ```
 
-#### Urls for test
+#### Test urls
 
-```bash
+```JSON
 {
-  'normal': 'https://raw.githubusercontent.com/marcelonieva7/Chest_X-rays_classification/main/test/data/normal.jpeg',
-  'covid': 'https://raw.githubusercontent.com/marcelonieva7/Chest_X-rays_classification/main/test/data/covid.jpg',
-  'pneumonia': 'https://raw.githubusercontent.com/marcelonieva7/Chest_X-rays_classification/main/test/data/pneumonia.jpeg'
+  "normal": "https://raw.githubusercontent.com/marcelonieva7/Chest_X-rays_classification/main/test/data/normal.jpeg",
+  "covid": "https://raw.githubusercontent.com/marcelonieva7/Chest_X-rays_classification/main/test/data/covid.jpg",
+  "pneumonia": "https://raw.githubusercontent.com/marcelonieva7/Chest_X-rays_classification/main/test/data/pneumonia.jpeg"
 }
 ```
 
@@ -131,7 +131,7 @@ docker run -it --rm -p 9696:9696 xrays:latest
 
 This will start a container running the project on port 9696.
 
-## Deployment
+## Cloud Deployment
 
 ### Publish a docker image to Google Container Registry
 
@@ -177,10 +177,12 @@ curl -X POST -H "Content-Type: application/json" -d '{
 ```
 
 This cURL request sends a POST request to the server running at https://xrays-app-srblipudfq-uc.a.run.app/predict with a JSON body containing x-ray image url. The server returns a response of:
-```bash
+```JSON
 {
   "Covid":-0.42221733927726746,
   "Normal":-0.47069013118743896,
   "Viral Pneumonia":0.4358460009098053
 }
 ```
+
+#### [Test urls](#Test-urls)

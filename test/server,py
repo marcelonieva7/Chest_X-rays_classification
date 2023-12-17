@@ -9,13 +9,11 @@ DATA = {
 url = 'http://127.0.0.1:9696/predict'
 
 keys = ' '.join(DATA.keys())
-#inp = input(f'Select a option: {keys}: ')
 
 while True:
   inp = input(f'Select a option: {keys}: ')
   if inp in DATA: break
   print(f'\033[91m {inp}: option not found.\033[00m', '\n')
-
 
 data = {'url': DATA[inp]}
 

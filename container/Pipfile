@@ -9,6 +9,7 @@ flask = "*"
 gunicorn = "*"
 tflite-runtime = "*"
 pillow = "*"
+flasgger = "==0.9.7b2"
 
 [dev-packages]
 
